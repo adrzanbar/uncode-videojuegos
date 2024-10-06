@@ -12,6 +12,7 @@ import com.uncode.videojuegos.model.service.exception.ServiceExceptionMessages;
 
 import jakarta.transaction.Transactional;
 
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -27,7 +28,7 @@ public class VideojuegoService {
     @Autowired
     private EstudioService estudioService;
 
-    private void validate(String nombre, float precio, short cantidad)
+    private void validate(String nombre, String rutaimg, float precio, short cantidad, String descripcion)
             throws ServiceException {
         try {
             if (nombre.isBlank())
@@ -36,6 +37,10 @@ public class VideojuegoService {
                 throw new ServiceException(ServiceExceptionMessages.nonNegative("precio"));
             if (cantidad < 0)
                 throw new ServiceException(ServiceExceptionMessages.nonNegative("cantidad"));
+            if (rutaimg.isBlank())
+                throw new ServiceException(ServiceExceptionMessages.blank(Videojuego.class, "rutaimg"));
+            if (descripcion.isBlank())
+                throw new ServiceException(ServiceExceptionMessages.blank(Videojuego.class, "descripcion"));
         } catch (ServiceException e) {
             throw e;
         } catch (NullPointerException e) {
@@ -43,62 +48,66 @@ public class VideojuegoService {
         } catch (Exception e) {
             throw new ServiceException(ServiceExceptionMessages.ANY);
         }
-
     }
 
     @Transactional
-    public void save(String nombre, float precio, short cantidad, String nombreCategoria, String nombreEstudio)
-            throws ServiceException {
+    public void create(String nombre, String rutaimg, float precio, short cantidad, String descripcion, boolean oferta,
+            LocalDate lanzamiento, UUID categoriaId, UUID estudioId) throws ServiceException {
         try {
-            validate(nombre, precio, cantidad);
-            categoriaService.validate(nombreCategoria);
-            estudioService.validate(nombreEstudio);
+            validate(nombre, rutaimg, precio, cantidad, descripcion);
             if (repository.existsByActivoTrueAndNombre(nombre)) {
                 throw new ServiceException(ServiceExceptionMessages.exists(Videojuego.class, "nombre", nombre));
             }
             repository.save(Videojuego.builder()
                     .nombre(nombre)
+                    .rutaimg(rutaimg)
                     .precio(precio)
                     .cantidad(cantidad)
-                    .categoria(categoriaService.get(nombreCategoria)
-                            .orElseGet(() -> Categoria.builder().nombre(nombreCategoria).build()))
-                    .estudio(estudioService.get(nombreEstudio)
-                            .orElseGet(() -> Estudio.builder().nombre(nombreEstudio).build()))
+                    .descripcion(descripcion)
+                    .oferta(oferta)
+                    .lanzamiento(lanzamiento)
+                    .categoria(categoriaService.get(categoriaId)
+                            .orElseThrow(
+                                    () -> new ServiceException(ServiceExceptionMessages.notFound(Categoria.class))))
+                    .estudio(estudioService.get(categoriaId)
+                            .orElseThrow(() -> new ServiceException(ServiceExceptionMessages.notFound(Estudio.class))))
                     .build());
         } catch (ServiceException e) {
             throw e;
         } catch (Exception e) {
             throw new ServiceException(ServiceExceptionMessages.ANY);
         }
-
     }
 
     @Transactional
-    public void update(UUID id, String nombre, float precio, short cantidad, String nombreCategoria,
-            String nombreEstudio) throws ServiceException {
+    public void update(UUID id, String nombre, String rutaimg, float precio, short cantidad, String descripcion,
+            boolean oferta,
+            LocalDate lanzamiento, UUID categoriaId, UUID estudioId) throws ServiceException {
         try {
-            validate(nombre, precio, cantidad);
-            categoriaService.validate(nombreCategoria);
-            estudioService.validate(nombreEstudio);
+            validate(nombre, rutaimg, precio, cantidad, descripcion);
             if (repository.existsByIdNotAndActivoTrueAndNombre(id, nombre)) {
                 throw new ServiceException(ServiceExceptionMessages.exists(Videojuego.class, "nombre", nombre));
             }
             var videojuego = repository.findByIdAndActivoTrue(id)
                     .orElseThrow(() -> new ServiceException(ServiceExceptionMessages.notFound(Videojuego.class)));
             videojuego.setNombre(nombre);
+            videojuego.setRutaimg(rutaimg);
             videojuego.setPrecio(precio);
             videojuego.setCantidad(cantidad);
-            videojuego.setCategoria(categoriaService.get(nombreCategoria)
-                    .orElseGet(() -> Categoria.builder().nombre(nombreCategoria).build()));
-            videojuego.setEstudio(estudioService.get(nombreEstudio)
-                    .orElseGet(() -> Estudio.builder().nombre(nombreEstudio).build()));
+            videojuego.setDescripcion(descripcion);
+            videojuego.setOferta(oferta);
+            videojuego.setLanzamiento(lanzamiento);
+            videojuego.setCategoria(categoriaService.get(categoriaId)
+                    .orElseThrow(
+                            () -> new ServiceException(ServiceExceptionMessages.notFound(Categoria.class))));
+            videojuego.setEstudio(estudioService.get(categoriaId)
+                    .orElseThrow(() -> new ServiceException(ServiceExceptionMessages.notFound(Estudio.class))));
             repository.save(videojuego);
         } catch (ServiceException e) {
             throw e;
         } catch (Exception e) {
             throw new ServiceException(ServiceExceptionMessages.ANY);
         }
-
     }
 
     @Transactional

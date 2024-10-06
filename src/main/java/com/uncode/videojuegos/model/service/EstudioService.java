@@ -36,7 +36,7 @@ public class EstudioService {
     }
 
     @Transactional
-    public void save(String nombre) throws ServiceException {
+    public void create(String nombre) throws ServiceException {
         try {
             validate(nombre);
             if (repository.existsByActivoTrueAndNombre(nombre)) {

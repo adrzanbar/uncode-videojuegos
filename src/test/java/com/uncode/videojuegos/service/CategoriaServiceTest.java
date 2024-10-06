@@ -34,14 +34,13 @@ public class CategoriaServiceTest {
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
-        categoriaId = UUID.randomUUID();
-        categoria = Categoria.builder().id(categoriaId).nombre(nombre).build();
+        categoria = Categoria.builder().id(UUID.randomUUID()).nombre(nombre).build();
     }
 
     @Test
     public void testSaveCategoria_Success() throws ServiceException {
         when(repository.existsByActivoTrueAndNombre(nombre)).thenReturn(false);
-        service.save(nombre);
+        service.create(nombre);
 
         verify(repository).save(any(Categoria.class));
     }
@@ -51,7 +50,7 @@ public class CategoriaServiceTest {
         when(repository.existsByActivoTrueAndNombre(nombre)).thenReturn(true);
 
         ServiceException exception = assertThrows(ServiceException.class, () -> {
-            service.save(nombre);
+            service.create(nombre);
         });
 
         assertEquals(ServiceExceptionMessages.exists(Categoria.class, "nombre", nombre), exception.getMessage());
@@ -60,7 +59,7 @@ public class CategoriaServiceTest {
     @Test
     public void testSaveCategoria_BlankName() {
         ServiceException exception = assertThrows(ServiceException.class, () -> {
-            service.save("    ");
+            service.create("    ");
         });
 
         assertEquals(ServiceExceptionMessages.blank(Categoria.class, "nombre"), exception.getMessage());

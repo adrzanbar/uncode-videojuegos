@@ -40,14 +40,13 @@ public class EstudioServiceTest {
     @BeforeEach
     public void setUp() {
         MockitoAnnotations.openMocks(this);
-        estudioId = UUID.randomUUID();
-        estudio = Estudio.builder().id(estudioId).nombre(nombre).build();
+        estudio = Estudio.builder().id(UUID.randomUUID()).nombre(nombre).build();
     }
 
     @Test
     public void testSaveEstudio_Success() throws ServiceException {
         when(repository.existsByActivoTrueAndNombre(nombre)).thenReturn(false);
-        service.save(nombre);
+        service.create(nombre);
 
         verify(repository).save(any(Estudio.class));
     }
@@ -57,7 +56,7 @@ public class EstudioServiceTest {
         when(repository.existsByActivoTrueAndNombre(nombre)).thenReturn(true);
 
         ServiceException exception = assertThrows(ServiceException.class, () -> {
-            service.save(nombre);
+            service.create(nombre);
         });
 
         assertEquals(ServiceExceptionMessages.exists(Estudio.class, "nombre", nombre), exception.getMessage());
@@ -66,7 +65,7 @@ public class EstudioServiceTest {
     @Test
     public void testSaveEstudio_BlankName() {
         ServiceException exception = assertThrows(ServiceException.class, () -> {
-            service.save("    ");
+            service.create("    ");
         });
 
         assertEquals(ServiceExceptionMessages.blank(Estudio.class, "nombre"), exception.getMessage());
