@@ -77,10 +77,8 @@ public class CategoriaController {
             model.addAttribute("success", "Categoria actualizada correctamente");
         } catch (ServiceException e) {
             model.addAttribute("error", e.getMessage());
-            return "redirect:/categorias";
         } catch (Exception e) {
             model.addAttribute("error", "Ha ocurrido un error inesperado");
-            return "redirect:/categorias";
         }
         return "redirect:/categorias";
     }
