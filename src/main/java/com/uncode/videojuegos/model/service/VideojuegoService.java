@@ -69,7 +69,7 @@ public class VideojuegoService {
                     .categoria(categoriaService.get(categoriaId)
                             .orElseThrow(
                                     () -> new ServiceException(ServiceExceptionMessages.notFound(Categoria.class))))
-                    .estudio(estudioService.get(categoriaId)
+                    .estudio(estudioService.get(estudioId)
                             .orElseThrow(() -> new ServiceException(ServiceExceptionMessages.notFound(Estudio.class))))
                     .build());
         } catch (ServiceException e) {
@@ -100,7 +100,7 @@ public class VideojuegoService {
             videojuego.setCategoria(categoriaService.get(categoriaId)
                     .orElseThrow(
                             () -> new ServiceException(ServiceExceptionMessages.notFound(Categoria.class))));
-            videojuego.setEstudio(estudioService.get(categoriaId)
+            videojuego.setEstudio(estudioService.get(estudioId)
                     .orElseThrow(() -> new ServiceException(ServiceExceptionMessages.notFound(Estudio.class))));
             repository.save(videojuego);
         } catch (ServiceException e) {
