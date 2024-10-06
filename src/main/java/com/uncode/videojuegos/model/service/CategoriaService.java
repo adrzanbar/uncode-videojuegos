@@ -34,13 +34,11 @@ public class CategoriaService {
     }
 
     public void save(String nombre) throws ServiceException {
+        validate(nombre);
+        if (existsByNombreActivo(nombre)) {
+            throw new ServiceException("La categoría ya existe: " + nombre);
+        }
         try {
-            validate(nombre);
-
-            if (existsByNombreActivo(nombre)) {
-                throw new ServiceException("La categoría ya existe: " + nombre);
-            }
-
             repository.save(Categoria.builder()
                     .nombre(nombre)
                     .build());
@@ -50,13 +48,11 @@ public class CategoriaService {
     }
 
     public void update(String nombre, boolean activo) throws ServiceException {
+        validate(nombre);
+        if (!existsByNombreActivo(nombre)) {
+            throw new ServiceException("La categoría no existe: " + nombre);
+        }
         try {
-            validate(nombre);
-
-            if (!existsByNombreActivo(nombre)) {
-                throw new ServiceException("La categoría no existe: " + nombre);
-            }
-
             repository.save(Categoria.builder().nombre(nombre).build());
         } catch (Exception e) {
             throw new ServiceException("No se pudo actualizar la categoría");
@@ -65,7 +61,7 @@ public class CategoriaService {
 
     public Optional<Categoria> findByNombreActivo(String nombre) throws ServiceException {
         try {
-            return repository.findOne(Example.of(Categoria.builder().nombre(nombre).activo(true).build(), nombreActivoMatcher));
+            return repository.findOne(Example.of(Categoria.builder().nombre(nombre).build(), nombreActivoMatcher));
         } catch (Exception e) {
             throw new ServiceException("No se pudo encontrar la categoría: " + nombre);
         }

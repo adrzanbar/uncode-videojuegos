@@ -45,80 +45,80 @@ public class VideojuegoService {
             throw new ServiceException("El estudio no puede estar vacío");
     }
 
-    public boolean existsByNombreActivo(String name) {
+    public boolean existsByNombreActivo(String nombre) {
         return repository
-                .exists(Example.of(Videojuego.builder().nombre(name).activo(true).build(), nombreActivoMatcher));
+                .exists(Example.of(Videojuego.builder().nombre(nombre).activo(true).build(), nombreActivoMatcher));
     }
 
-    public void save(String name, String rutaimg, float precio, short cantidad, String descripcion, boolean oferta,
+    public void save(String nombre, String rutaimg, float precio, short cantidad, String descripcion, boolean oferta,
             LocalDate lanzamiento, String nombreCategoria, String nombreEstudio) throws ServiceException {
         try {
-            validate(name, precio, cantidad, nombreCategoria, nombreEstudio);
+            validate(nombre, precio, cantidad, nombreCategoria, nombreEstudio);
 
-            if (existsByNombreActivo(name))
-                throw new ServiceException("El videojuego ya existe");
+            if (existsByNombreActivo(nombre))
+                throw new ServiceException("El videojuego ya existe: " + nombre);
 
             repository.save(Videojuego.builder()
-                    .nombre(name)
+                    .nombre(nombre)
                     .rutaimg(rutaimg)
                     .precio(precio)
                     .cantidad(cantidad)
                     .descripcion(descripcion)
                     .oferta(oferta)
                     .lanzamiento(lanzamiento)
-                    .categoria(categoriaService.findByNombreActivo(name)
+                    .categoria(categoriaService.findByNombreActivo(nombre)
                             .orElse(Categoria.builder().nombre(nombreCategoria).build()))
-                    .estudio(estudioService.findByNombreActivo(name)
+                    .estudio(estudioService.findByNombreActivo(nombre)
                             .orElse(Estudio.builder().nombre(nombreEstudio).build()))
                     .build());
         } catch (Exception e) {
-            throw new ServiceException("No se pudo guardar el videojuego");
+            throw new ServiceException("No se pudo guardar el videojuego: " + nombre);
         }
     }
 
-    public void update(String name, String rutaimg, float precio, short cantidad, String descripcion, boolean oferta,
+    public void update(String nombre, String rutaimg, float precio, short cantidad, String descripcion, boolean oferta,
             LocalDate lanzamiento, String nombreCategoria, String nombreEstudio) throws ServiceException {
         try {
-            validate(name, precio, cantidad, nombreCategoria, nombreEstudio);
+            validate(nombre, precio, cantidad, nombreCategoria, nombreEstudio);
 
-            if (!existsByNombreActivo(name))
-                throw new ServiceException("El videojuego no existe");
+            if (!existsByNombreActivo(nombre))
+                throw new ServiceException("El videojuego no existe: " + nombre);
 
             repository.save(Videojuego.builder()
-                    .nombre(name)
+                    .nombre(nombre)
                     .rutaimg(rutaimg)
                     .precio(precio)
                     .cantidad(cantidad)
                     .descripcion(descripcion)
                     .oferta(oferta)
                     .lanzamiento(lanzamiento)
-                    .categoria(categoriaService.findByNombreActivo(name)
+                    .categoria(categoriaService.findByNombreActivo(nombre)
                             .orElse(Categoria.builder().nombre(nombreCategoria).build()))
-                    .estudio(estudioService.findByNombreActivo(name)
+                    .estudio(estudioService.findByNombreActivo(nombre)
                             .orElse(Estudio.builder().nombre(nombreEstudio).build()))
                     .build());
         } catch (Exception e) {
-            throw new ServiceException("No se pudo actualizar el videojuego");
+            throw new ServiceException("No se pudo actualizar el videojuego: " + nombre);
         }
     }
 
-    public Optional<Videojuego> findByNombreActivo(String name) throws ServiceException {
+    public Optional<Videojuego> findByNombreActivo(String nombre) throws ServiceException {
         try {
             return repository
-                    .findOne(Example.of(Videojuego.builder().nombre(name).build(), nombreActivoMatcher));
+                    .findOne(Example.of(Videojuego.builder().nombre(nombre).build(), nombreActivoMatcher));
         } catch (Exception e) {
-            throw new ServiceException("No se pudo encontrar el videojuego");
+            throw new ServiceException("No se pudo encontrar el videojuego: " + nombre);
         }
     }
 
-    public void delete(String name) throws ServiceException {
+    public void delete(String nombre) throws ServiceException {
         try {
-            findByNombreActivo(name).ifPresent((videojuego) -> {
+            findByNombreActivo(nombre).ifPresent((videojuego) -> {
                 videojuego.setActivo(false);
                 repository.save(videojuego);
             });
         } catch (Exception e) {
-            throw new ServiceException("No se pudo eliminar el videojuego");
+            throw new ServiceException("No se pudo eliminar el videojuego: " + nombre);
         }
     }
 
