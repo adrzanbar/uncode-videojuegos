@@ -3,10 +3,9 @@ package com.uncode.videojuegos.model.service;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
 
 import com.uncode.videojuegos.model.entity.Estudio;
@@ -21,74 +20,52 @@ public class EstudioService {
     @Autowired
     private EstudioRepository repository;
 
-    private final ExampleMatcher nombreActivoMatcher = ExampleMatcher.matching()
-            .withMatcher("nombre", ExampleMatcher.GenericPropertyMatchers.exact())
-            .withMatcher("activo", ExampleMatcher.GenericPropertyMatchers.exact());
-
-    private void validate(String nombre) throws ServiceException {
+    public void validate(String nombre) throws ServiceException {
         if (nombre.isBlank()) {
             throw new ServiceException("El nombre no puede estar vacío");
         }
     }
 
-    public boolean existsByNombreActivo(String nombre) {
-        return repository.exists(Example.of(Estudio.builder().nombre(nombre).build(), nombreActivoMatcher));
-    }
-
     @Transactional
     public void save(String nombre) throws ServiceException {
         validate(nombre);
-        if (existsByNombreActivo(nombre)) {
+        if (repository.existsByActivoTrueAndNombre(nombre)) {
             throw new ServiceException("El estudio ya existe: " + nombre);
         }
-        try {
-            repository.save(Estudio.builder()
-                    .nombre(nombre)
-                    .build());
-        } catch (Exception e) {
-            throw new ServiceException("No se pudo guardar el estudio");
-        }
+        repository.save(Estudio.builder()
+                .nombre(nombre)
+                .build());
     }
 
     @Transactional
-    public void update(String nombre, boolean activo) throws ServiceException {
+    public void update(UUID id, String nombre) throws ServiceException {
         validate(nombre);
-        if (!existsByNombreActivo(nombre)) {
-            throw new ServiceException("El estudio no existe: " + nombre);
+        if (repository.existsByIdNotAndActivoTrueAndNombre(id, nombre)) {
+            throw new ServiceException("El estudio ya existe: " + nombre);
         }
-        try {
-            repository.save(Estudio.builder().nombre(nombre).build());
-        } catch (Exception e) {
-            throw new ServiceException("No se pudo actualizar el estudio");
-        }
-    }
-
-    public Optional<Estudio> findByNombreActivo(String nombre) throws ServiceException {
-        try {
-            return repository
-                    .findOne(Example.of(Estudio.builder().nombre(nombre).build(), nombreActivoMatcher));
-        } catch (Exception e) {
-            throw new ServiceException("No se pudo encontrar el estudio: " + nombre);
-        }
+        var estudio = repository.findByIdAndActivoTrue(id)
+                .orElseThrow(() -> new ServiceException("No se pudo encontrar el estudio: " + id));
+        estudio.setNombre(nombre);
+        repository.save(estudio);
     }
 
     @Transactional
-    public void delete(String nombre) throws ServiceException {
-        try {
-            findByNombreActivo(nombre).ifPresent(estudio -> {
-                estudio.setActivo(false);
-                repository.save(estudio);
-            });
-        } catch (Exception e) {
-            throw new ServiceException("No se pudo eliminar el estudio: " + nombre);
-        }
+    public void delete(UUID id) throws ServiceException {
+        var estudio = repository.findByIdAndActivoTrue(id)
+                .orElseThrow(() -> new ServiceException("No se pudo encontrar el estudio: " + id));
+        estudio.setActivo(false);
+        repository.save(estudio);
     }
 
-    public Set<Estudio> findAll() throws ServiceException {
-        try {
-            return new HashSet<>(repository.findAll());
-        } catch (Exception e) {
-            throw new ServiceException("No se pudo encontrar los estudios");
-        }
+    public Set<Estudio> getAll() throws ServiceException {
+        return new HashSet<>(repository.findByActivoTrue());
+    }
+
+    public Optional<Estudio> get(UUID id) throws ServiceException {
+        return repository.findByIdAndActivoTrue(id);
+    }
+
+    public Optional<Estudio> get(String nombre) throws ServiceException {
+        return repository.findByActivoTrueAndNombre(nombre);
     }
 }

@@ -3,10 +3,9 @@ package com.uncode.videojuegos.model.service;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Example;
-import org.springframework.data.domain.ExampleMatcher;
 import org.springframework.stereotype.Service;
 
 import com.uncode.videojuegos.model.entity.Categoria;
@@ -21,73 +20,52 @@ public class CategoriaService {
     @Autowired
     private CategoriaRepository repository;
 
-    private final ExampleMatcher nombreActivoMatcher = ExampleMatcher.matching()
-            .withMatcher("nombre", ExampleMatcher.GenericPropertyMatchers.exact())
-            .withMatcher("activo", ExampleMatcher.GenericPropertyMatchers.exact());
-
-    private void validate(String nombre) throws ServiceException {
+    public void validate(String nombre) throws ServiceException {
         if (nombre.isBlank()) {
             throw new ServiceException("El nombre no puede estar vacío");
         }
     }
 
-    public boolean existsByNombreActivo(String nombre) {
-        return repository.exists(Example.of(Categoria.builder().nombre(nombre).build(), nombreActivoMatcher));
-    }
-
     @Transactional
     public void save(String nombre) throws ServiceException {
         validate(nombre);
-        if (existsByNombreActivo(nombre)) {
+        if (repository.existsByActivoTrueAndNombre(nombre)) {
             throw new ServiceException("La categoría ya existe: " + nombre);
         }
-        try {
-            repository.save(Categoria.builder()
-                    .nombre(nombre)
-                    .build());
-        } catch (Exception e) {
-            throw new ServiceException("No se pudo guardar la categoría");
-        }
+        repository.save(Categoria.builder()
+                .nombre(nombre)
+                .build());
     }
 
     @Transactional
-    public void update(String nombre, boolean activo) throws ServiceException {
+    public void update(UUID id, String nombre) throws ServiceException {
         validate(nombre);
-        if (!existsByNombreActivo(nombre)) {
-            throw new ServiceException("La categoría no existe: " + nombre);
+        if (repository.existsByIdNotAndActivoTrueAndNombre(id, nombre)) {
+            throw new ServiceException("La categoría ya existe: " + nombre);
         }
-        try {
-            repository.save(Categoria.builder().nombre(nombre).build());
-        } catch (Exception e) {
-            throw new ServiceException("No se pudo actualizar la categoría");
-        }
+        var categoria = repository.findByIdAndActivoTrue(id)
+                .orElseThrow(() -> new ServiceException("No se pudo encontrar la categoría: " + id));
+        categoria.setNombre(nombre);
+        repository.save(categoria);
     }
 
-    public Optional<Categoria> findByNombreActivo(String nombre) throws ServiceException {
-        try {
-            return repository.findOne(Example.of(Categoria.builder().nombre(nombre).build(), nombreActivoMatcher));
-        } catch (Exception e) {
-            throw new ServiceException("No se pudo encontrar la categoría: " + nombre);
-        }
-    }
-    
     @Transactional
-    public void delete(String nombre) throws ServiceException {
-        try {
-            findByNombreActivo(nombre).ifPresent(categoria -> {
-                categoria.setActivo(false);
-                repository.save(categoria);
-            });
-        } catch (Exception e) {
-            throw new ServiceException("No se pudo eliminar la categoría: " + nombre);
-        }
+    public void delete(UUID id) throws ServiceException {
+        var categoria = repository.findByIdAndActivoTrue(id)
+                .orElseThrow(() -> new ServiceException("No se pudo encontrar la categoría: " + id));
+        categoria.setActivo(false);
+        repository.save(categoria);
     }
 
-    public Set<Categoria> findAll() throws ServiceException {
-        try {
-            return new HashSet<>(repository.findAll());
-        } catch (Exception e) {
-            throw new ServiceException("No se pudo encontrar las categorías");
-        }
+    public Set<Categoria> getAll() throws ServiceException {
+        return new HashSet<>(repository.findByActivoTrue());
+    }
+
+    public Optional<Categoria> get(UUID id) throws ServiceException {
+        return repository.findByIdAndActivoTrue(id);
+    }
+
+    public Optional<Categoria> get(String nombre) throws ServiceException {
+        return repository.findByActivoTrueAndNombre(nombre);
     }
 }
