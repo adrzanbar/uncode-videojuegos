@@ -13,6 +13,8 @@ import com.uncode.videojuegos.model.entity.Estudio;
 import com.uncode.videojuegos.model.repository.EstudioRepository;
 import com.uncode.videojuegos.model.service.exception.ServiceException;
 
+import jakarta.transaction.Transactional;
+
 @Service
 public class EstudioService {
 
@@ -33,14 +35,13 @@ public class EstudioService {
         return repository.exists(Example.of(Estudio.builder().nombre(nombre).build(), nombreActivoMatcher));
     }
 
+    @Transactional
     public void save(String nombre) throws ServiceException {
+        validate(nombre);
+        if (existsByNombreActivo(nombre)) {
+            throw new ServiceException("El estudio ya existe: " + nombre);
+        }
         try {
-            validate(nombre);
-
-            if (existsByNombreActivo(nombre)) {
-                throw new ServiceException("El estudio ya existe: " + nombre);
-            }
-
             repository.save(Estudio.builder()
                     .nombre(nombre)
                     .build());
@@ -49,14 +50,13 @@ public class EstudioService {
         }
     }
 
+    @Transactional
     public void update(String nombre, boolean activo) throws ServiceException {
+        validate(nombre);
+        if (!existsByNombreActivo(nombre)) {
+            throw new ServiceException("El estudio no existe: " + nombre);
+        }
         try {
-            validate(nombre);
-
-            if (!existsByNombreActivo(nombre)) {
-                throw new ServiceException("El estudio no existe: " + nombre);
-            }
-
             repository.save(Estudio.builder().nombre(nombre).build());
         } catch (Exception e) {
             throw new ServiceException("No se pudo actualizar el estudio");
@@ -72,6 +72,7 @@ public class EstudioService {
         }
     }
 
+    @Transactional
     public void delete(String nombre) throws ServiceException {
         try {
             findByNombreActivo(nombre).ifPresent(estudio -> {

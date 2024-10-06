@@ -11,6 +11,8 @@ import com.uncode.videojuegos.model.entity.Videojuego;
 import com.uncode.videojuegos.model.repository.VideojuegoRepository;
 import com.uncode.videojuegos.model.service.exception.ServiceException;
 
+import jakarta.transaction.Transactional;
+
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Optional;
@@ -50,14 +52,13 @@ public class VideojuegoService {
                 .exists(Example.of(Videojuego.builder().nombre(nombre).activo(true).build(), nombreActivoMatcher));
     }
 
+    @Transactional
     public void save(String nombre, String rutaimg, float precio, short cantidad, String descripcion, boolean oferta,
             LocalDate lanzamiento, String nombreCategoria, String nombreEstudio) throws ServiceException {
+        validate(nombre, precio, cantidad, nombreCategoria, nombreEstudio);
+        if (existsByNombreActivo(nombre))
+            throw new ServiceException("El videojuego ya existe: " + nombre);
         try {
-            validate(nombre, precio, cantidad, nombreCategoria, nombreEstudio);
-
-            if (existsByNombreActivo(nombre))
-                throw new ServiceException("El videojuego ya existe: " + nombre);
-
             repository.save(Videojuego.builder()
                     .nombre(nombre)
                     .rutaimg(rutaimg)
@@ -76,14 +77,13 @@ public class VideojuegoService {
         }
     }
 
+    @Transactional
     public void update(String nombre, String rutaimg, float precio, short cantidad, String descripcion, boolean oferta,
             LocalDate lanzamiento, String nombreCategoria, String nombreEstudio) throws ServiceException {
+        validate(nombre, precio, cantidad, nombreCategoria, nombreEstudio);
+        if (!existsByNombreActivo(nombre))
+            throw new ServiceException("El videojuego no existe: " + nombre);
         try {
-            validate(nombre, precio, cantidad, nombreCategoria, nombreEstudio);
-
-            if (!existsByNombreActivo(nombre))
-                throw new ServiceException("El videojuego no existe: " + nombre);
-
             repository.save(Videojuego.builder()
                     .nombre(nombre)
                     .rutaimg(rutaimg)
@@ -111,6 +111,7 @@ public class VideojuegoService {
         }
     }
 
+    @Transactional
     public void delete(String nombre) throws ServiceException {
         try {
             findByNombreActivo(nombre).ifPresent((videojuego) -> {

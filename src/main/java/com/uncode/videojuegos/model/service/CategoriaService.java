@@ -13,6 +13,8 @@ import com.uncode.videojuegos.model.entity.Categoria;
 import com.uncode.videojuegos.model.repository.CategoriaRepository;
 import com.uncode.videojuegos.model.service.exception.ServiceException;
 
+import jakarta.transaction.Transactional;
+
 @Service
 public class CategoriaService {
 
@@ -33,6 +35,7 @@ public class CategoriaService {
         return repository.exists(Example.of(Categoria.builder().nombre(nombre).build(), nombreActivoMatcher));
     }
 
+    @Transactional
     public void save(String nombre) throws ServiceException {
         validate(nombre);
         if (existsByNombreActivo(nombre)) {
@@ -47,6 +50,7 @@ public class CategoriaService {
         }
     }
 
+    @Transactional
     public void update(String nombre, boolean activo) throws ServiceException {
         validate(nombre);
         if (!existsByNombreActivo(nombre)) {
@@ -66,7 +70,8 @@ public class CategoriaService {
             throw new ServiceException("No se pudo encontrar la categoría: " + nombre);
         }
     }
-
+    
+    @Transactional
     public void delete(String nombre) throws ServiceException {
         try {
             findByNombreActivo(nombre).ifPresent(categoria -> {
