@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Formulario de Categoría</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
+
 <body>
     <div class="container mt-5">
         <h1 th:if="${categoria == null}">Nueva Categoría</h1>
@@ -16,10 +18,12 @@
         <form th:action="@{${categoria != null} ? '/categorias/' + ${categoria.id} : '/categorias'}" method="post">
             <div class="mb-3">
                 <label for="nombre" class="form-label">Nombre:</label>
-                <input type="text" id="nombre" name="nombre" class="form-control" 
-                       th:value="${categoria != null} ? ${categoria.nombre} : ''" required />
+                <input type="text" id="nombre" name="nombre" class="form-control"
+                    th:value="${categoria != null} ? ${categoria.nombre} : ${newCategoria != null ? newCategoria.nombre : ''}"
+                    required />
             </div>
-            <button type="submit" class="btn btn-primary" th:text="${categoria != null} ? 'Actualizar' : 'Guardar'"></button>
+            <button type="submit" class="btn btn-primary"
+                th:text="${categoria != null} ? 'Actualizar' : 'Guardar'"></button>
         </form>
 
         <a class="btn btn-secondary mt-3" href="/categorias">Regresar a la lista</a>
@@ -27,4 +31,5 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>

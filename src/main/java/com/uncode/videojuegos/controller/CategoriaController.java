@@ -10,10 +10,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.uncode.videojuegos.model.entity.Categoria;
 import com.uncode.videojuegos.model.service.CategoriaService;
 import com.uncode.videojuegos.model.service.exception.ServiceException;
-
 
 @Controller
 @RequestMapping("/categorias")
@@ -36,14 +37,19 @@ public class CategoriaController {
     }
 
     @PostMapping
-    public String postCategoria(@RequestParam String nombre, Model model) {
+    public String postCategoria(@RequestParam String nombre, Model model,
+            RedirectAttributes redirectAttributes) {
         try {
             service.create(nombre);
-            model.addAttribute("success", "Categoria guardada correctamente");
+            redirectAttributes.addFlashAttribute("success", "Categoria guardada correctamente");
         } catch (ServiceException e) {
             model.addAttribute("error", e.getMessage());
+            model.addAttribute("newCategoria", Categoria.builder().nombre(nombre).build());
+            return "categoria/form";
         } catch (Exception e) {
             model.addAttribute("error", "Ha ocurrido un error inesperado");
+            model.addAttribute("newCategoria", Categoria.builder().nombre(nombre).build());
+            return "categoria/form";
         }
         return "redirect:/categorias";
     }
@@ -57,8 +63,7 @@ public class CategoriaController {
     public String getCategoria(@PathVariable UUID id, Model model) {
         try {
             var categoria = service.get(id).orElseThrow(
-                () -> new ServiceException("Categoria no encontrada")
-            );
+                    () -> new ServiceException("Categoria no encontrada"));
             model.addAttribute("categoria", categoria);
         } catch (ServiceException e) {
             model.addAttribute("error", e.getMessage());
@@ -71,16 +76,18 @@ public class CategoriaController {
     }
 
     @PostMapping("/{id}")
-    public String putCategoria(@PathVariable UUID id, @RequestParam String nombre, Model model) {
+    public String putCategoria(@PathVariable UUID id, @RequestParam String nombre, Model model,
+            RedirectAttributes redirectAttributes) {
         try {
             service.update(id, nombre);
-            model.addAttribute("success", "Categoria actualizada correctamente");
+            redirectAttributes.addFlashAttribute("success", "Categoría actualizada correctamente");
+            return "redirect:/categorias";
         } catch (ServiceException e) {
             model.addAttribute("error", e.getMessage());
         } catch (Exception e) {
             model.addAttribute("error", "Ha ocurrido un error inesperado");
         }
-        return "redirect:/categorias";
+        return "categoria/form";
     }
 
     @PostMapping("/{id}/delete")
