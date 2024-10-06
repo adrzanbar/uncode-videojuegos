@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import com.uncode.videojuegos.model.entity.Categoria;
 import com.uncode.videojuegos.model.repository.CategoriaRepository;
 import com.uncode.videojuegos.model.service.exception.ServiceException;
+import com.uncode.videojuegos.model.service.exception.ServiceExceptionMessages;
 
 import jakarta.transaction.Transactional;
 
@@ -21,51 +22,91 @@ public class CategoriaService {
     private CategoriaRepository repository;
 
     public void validate(String nombre) throws ServiceException {
-        if (nombre.isBlank()) {
-            throw new ServiceException("El nombre no puede estar vacío");
+        try {
+            if (nombre.isBlank()) {
+                throw new ServiceException(ServiceExceptionMessages.blank(Categoria.class, "nombre"));
+            }
+        } catch (ServiceException e) {
+            throw e;
+        } catch (NullPointerException e) {
+            throw new ServiceException(ServiceExceptionMessages.$null(Categoria.class, "nombre"));
+        } catch (Exception e) {
+            throw new ServiceException(ServiceExceptionMessages.ANY);
         }
     }
 
     @Transactional
     public void save(String nombre) throws ServiceException {
-        validate(nombre);
-        if (repository.existsByActivoTrueAndNombre(nombre)) {
-            throw new ServiceException("La categoría ya existe: " + nombre);
+        try {
+            validate(nombre);
+            if (repository.existsByActivoTrueAndNombre(nombre)) {
+                throw new ServiceException(ServiceExceptionMessages.exists(Categoria.class, "nombre", nombre));
+            }
+            repository.save(Categoria.builder()
+                    .nombre(nombre)
+                    .build());
+        } catch (ServiceException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ServiceException(ServiceExceptionMessages.ANY);
         }
-        repository.save(Categoria.builder()
-                .nombre(nombre)
-                .build());
     }
 
     @Transactional
     public void update(UUID id, String nombre) throws ServiceException {
-        validate(nombre);
-        if (repository.existsByIdNotAndActivoTrueAndNombre(id, nombre)) {
-            throw new ServiceException("La categoría ya existe: " + nombre);
+        try {
+            validate(nombre);
+            if (repository.existsByIdNotAndActivoTrueAndNombre(id, nombre)) {
+                throw new ServiceException(ServiceExceptionMessages.exists(Categoria.class, "nombre", nombre));
+            }
+            var categoria = repository.findByIdAndActivoTrue(id)
+                    .orElseThrow(() -> new ServiceException(ServiceExceptionMessages.notFound(Categoria.class)));
+            categoria.setNombre(nombre);
+            repository.save(categoria);
+        } catch (ServiceException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ServiceException(ServiceExceptionMessages.ANY);
         }
-        var categoria = repository.findByIdAndActivoTrue(id)
-                .orElseThrow(() -> new ServiceException("No se pudo encontrar la categoría: " + id));
-        categoria.setNombre(nombre);
-        repository.save(categoria);
+
     }
 
     @Transactional
     public void delete(UUID id) throws ServiceException {
-        var categoria = repository.findByIdAndActivoTrue(id)
-                .orElseThrow(() -> new ServiceException("No se pudo encontrar la categoría: " + id));
-        categoria.setActivo(false);
-        repository.save(categoria);
+        try {
+            var categoria = repository.findByIdAndActivoTrue(id)
+                    .orElseThrow(() -> new ServiceException(ServiceExceptionMessages.notFound(Categoria.class)));
+            categoria.setActivo(false);
+            repository.save(categoria);
+        } catch (ServiceException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new ServiceException(ServiceExceptionMessages.ANY);
+        }
+
     }
 
     public Set<Categoria> getAll() throws ServiceException {
-        return new HashSet<>(repository.findByActivoTrue());
+        try {
+            return new HashSet<>(repository.findByActivoTrue());
+        } catch (Exception e) {
+            throw new ServiceException(ServiceExceptionMessages.ANY);
+        }
     }
 
     public Optional<Categoria> get(UUID id) throws ServiceException {
-        return repository.findByIdAndActivoTrue(id);
+        try {
+            return repository.findByIdAndActivoTrue(id);
+        } catch (Exception e) {
+            throw new ServiceException(ServiceExceptionMessages.ANY);
+        }
     }
 
     public Optional<Categoria> get(String nombre) throws ServiceException {
-        return repository.findByActivoTrueAndNombre(nombre);
+        try {
+            return repository.findByActivoTrueAndNombre(nombre);
+        } catch (Exception e) {
+            throw new ServiceException(ServiceExceptionMessages.ANY);
+        }
     }
 }
