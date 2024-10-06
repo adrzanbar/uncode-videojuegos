@@ -24,7 +24,7 @@ public class CategoriaServiceTest {
     private CategoriaRepository repository;
 
     @InjectMocks
-    private CategoriaService categoriaService;
+    private CategoriaService service;
 
     private UUID categoriaId;
     private String nombre = "categoria";
@@ -41,7 +41,7 @@ public class CategoriaServiceTest {
     @Test
     public void testSaveCategoria_Success() throws ServiceException {
         when(repository.existsByActivoTrueAndNombre(nombre)).thenReturn(false);
-        categoriaService.save(nombre);
+        service.save(nombre);
 
         verify(repository).save(any(Categoria.class));
     }
@@ -51,7 +51,7 @@ public class CategoriaServiceTest {
         when(repository.existsByActivoTrueAndNombre(nombre)).thenReturn(true);
 
         ServiceException exception = assertThrows(ServiceException.class, () -> {
-            categoriaService.save(nombre);
+            service.save(nombre);
         });
 
         assertEquals(ServiceExceptionMessages.exists(Categoria.class, "nombre", nombre), exception.getMessage());
@@ -60,7 +60,7 @@ public class CategoriaServiceTest {
     @Test
     public void testSaveCategoria_BlankName() {
         ServiceException exception = assertThrows(ServiceException.class, () -> {
-            categoriaService.save("    ");
+            service.save("    ");
         });
 
         assertEquals(ServiceExceptionMessages.blank(Categoria.class, "nombre"), exception.getMessage());
@@ -71,7 +71,7 @@ public class CategoriaServiceTest {
         when(repository.existsByIdNotAndActivoTrueAndNombre(categoriaId, nuevoNombre)).thenReturn(false);
         when(repository.findByIdAndActivoTrue(categoriaId)).thenReturn(Optional.of(categoria));
 
-        categoriaService.update(categoriaId, nuevoNombre);
+        service.update(categoriaId, nuevoNombre);
 
         assertEquals(nuevoNombre, categoria.getNombre());
         verify(repository).save(categoria);
@@ -82,7 +82,7 @@ public class CategoriaServiceTest {
         when(repository.findByIdAndActivoTrue(categoriaId)).thenReturn(Optional.empty());
 
         ServiceException exception = assertThrows(ServiceException.class, () -> {
-            categoriaService.update(categoriaId, nuevoNombre);
+            service.update(categoriaId, nuevoNombre);
         });
 
         assertEquals(ServiceExceptionMessages.notFound(Categoria.class), exception.getMessage());
@@ -94,7 +94,7 @@ public class CategoriaServiceTest {
         when(repository.findByIdAndActivoTrue(categoriaId)).thenReturn(Optional.of(categoria));
 
         ServiceException exception = assertThrows(ServiceException.class, () -> {
-            categoriaService.update(categoriaId, nuevoNombre);
+            service.update(categoriaId, nuevoNombre);
         });
 
         assertEquals(ServiceExceptionMessages.exists(Categoria.class, "nombre", nuevoNombre), exception.getMessage());
@@ -103,7 +103,7 @@ public class CategoriaServiceTest {
     @Test
     public void testUpdateCategoria_BlankName() {
         ServiceException exception = assertThrows(ServiceException.class, () -> {
-            categoriaService.update(categoriaId, "    ");
+            service.update(categoriaId, "    ");
         });
 
         assertEquals(ServiceExceptionMessages.blank(Categoria.class, "nombre"), exception.getMessage());
@@ -113,7 +113,7 @@ public class CategoriaServiceTest {
     public void testDeleteCategoria_Success() throws ServiceException {
         when(repository.findByIdAndActivoTrue(categoriaId)).thenReturn(Optional.of(categoria));
 
-        categoriaService.delete(categoriaId);
+        service.delete(categoriaId);
 
         assertFalse(categoria.isActivo());
         verify(repository).save(categoria);
@@ -124,7 +124,7 @@ public class CategoriaServiceTest {
         when(repository.findByIdAndActivoTrue(categoriaId)).thenReturn(Optional.empty());
 
         ServiceException exception = assertThrows(ServiceException.class, () -> {
-            categoriaService.delete(categoriaId);
+            service.delete(categoriaId);
         });
 
         assertEquals(ServiceExceptionMessages.notFound(Categoria.class), exception.getMessage());
@@ -134,7 +134,7 @@ public class CategoriaServiceTest {
     public void testGetAllCategories() throws ServiceException {
         when(repository.findByActivoTrue()).thenReturn(Set.of(categoria));
 
-        var categories = categoriaService.getAll();
+        var categories = service.getAll();
 
         assertEquals(1, categories.size());
         assertTrue(categories.contains(categoria));
@@ -144,7 +144,7 @@ public class CategoriaServiceTest {
     public void testGetCategoriaById() throws ServiceException {
         when(repository.findByIdAndActivoTrue(categoriaId)).thenReturn(Optional.of(categoria));
 
-        var result = categoriaService.get(categoriaId);
+        var result = service.get(categoriaId);
 
         assertTrue(result.isPresent());
         assertEquals(categoria, result.get());
@@ -154,7 +154,7 @@ public class CategoriaServiceTest {
     public void testGetCategoriaByName() throws ServiceException {
         when(repository.findByActivoTrueAndNombre(nombre)).thenReturn(Optional.of(categoria));
 
-        var result = categoriaService.get(nombre);
+        var result = service.get(nombre);
 
         assertTrue(result.isPresent());
         assertEquals(categoria, result.get());
