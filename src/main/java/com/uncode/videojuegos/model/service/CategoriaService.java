@@ -31,6 +31,7 @@ public class CategoriaService {
         } catch (NullPointerException e) {
             throw new ServiceException(ServiceExceptionMessages.$null(Categoria.class, "nombre"));
         } catch (Exception e) {
+            System.err.println(e.getMessage());
             throw new ServiceException(ServiceExceptionMessages.ANY);
         }
     }
@@ -48,6 +49,7 @@ public class CategoriaService {
         } catch (ServiceException e) {
             throw e;
         } catch (Exception e) {
+            System.err.println(e.getMessage());
             throw new ServiceException(ServiceExceptionMessages.ANY);
         }
     }
@@ -90,6 +92,7 @@ public class CategoriaService {
         try {
             return new HashSet<>(repository.findByActivoTrue());
         } catch (Exception e) {
+            System.err.println(e.getMessage());
             throw new ServiceException(ServiceExceptionMessages.ANY);
         }
     }

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Categorías</title>
+</head>
+
+<body>
+    <h1>Categorías</h1>
+
+    <div th:if="${error}">
+        <p style="color: red;" th:text="${error}"></p>
+    </div>
+
+    <div th:if="${success}">
+        <p style="color: green;" th:text="${success}"></p>
+    </div>
+
+    <a href="/categorias/new">Agregar Nueva Categoría</a>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="categoria : ${categorias}">
+                <td th:text="${categoria.id}"></td>
+                <td th:text="${categoria.nombre}"></td>
+                <td>
+                    <a th:href="@{/categorias/{id}(id=${categoria.id})}">Ver</a>
+                    <form th:action="@{/categorias/{id}/delete(id=${categoria.id})}" method="post"
+                        style="display:inline;">
+                        <button type="submit">Eliminar</button>
+                    </form>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+
+</html>

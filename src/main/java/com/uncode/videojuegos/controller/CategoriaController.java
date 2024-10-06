@@ -82,7 +82,7 @@ public class CategoriaController {
             model.addAttribute("error", "Ha ocurrido un error inesperado");
             return "redirect:/categorias";
         }
-        return "redirect:/categorias/" + id;
+        return "redirect:/categorias";
     }
 
     @PostMapping("/{id}/delete")
