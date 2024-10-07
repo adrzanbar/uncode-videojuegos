@@ -51,14 +51,14 @@ public class VideojuegoService {
     }
 
     @Transactional
-    public void create(String nombre, String rutaimg, float precio, short cantidad, String descripcion, boolean oferta,
+    public UUID create(String nombre, String rutaimg, float precio, short cantidad, String descripcion, boolean oferta,
             LocalDate lanzamiento, UUID categoriaId, UUID estudioId) throws ServiceException {
         try {
             validate(nombre, rutaimg, precio, cantidad, descripcion);
             if (repository.existsByActivoTrueAndNombre(nombre)) {
                 throw new ServiceException(ServiceExceptionMessages.exists(Videojuego.class, "nombre", nombre));
             }
-            repository.save(Videojuego.builder()
+            var videojuego = Videojuego.builder()
                     .nombre(nombre)
                     .rutaimg(rutaimg)
                     .precio(precio)
@@ -71,7 +71,9 @@ public class VideojuegoService {
                                     () -> new ServiceException(ServiceExceptionMessages.notFound(Categoria.class))))
                     .estudio(estudioService.get(estudioId)
                             .orElseThrow(() -> new ServiceException(ServiceExceptionMessages.notFound(Estudio.class))))
-                    .build());
+                    .build();
+            repository.save(videojuego);
+            return videojuego.getId();
         } catch (ServiceException e) {
             throw e;
         } catch (Exception e) {

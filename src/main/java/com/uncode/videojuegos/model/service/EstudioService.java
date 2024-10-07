@@ -36,15 +36,17 @@ public class EstudioService {
     }
 
     @Transactional
-    public void create(String nombre) throws ServiceException {
+    public UUID create(String nombre) throws ServiceException {
         try {
             validate(nombre);
             if (repository.existsByActivoTrueAndNombre(nombre)) {
                 throw new ServiceException(ServiceExceptionMessages.exists(Estudio.class, "nombre", nombre));
             }
-            repository.save(Estudio.builder()
+            var estudio = Estudio.builder()
                     .nombre(nombre)
-                    .build());
+                    .build();
+            repository.save(estudio);
+            return estudio.getId();
         } catch (ServiceException e) {
             throw e;
         } catch (Exception e) {

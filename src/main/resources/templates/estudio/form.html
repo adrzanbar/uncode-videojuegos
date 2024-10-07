@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Formulario de Estudio</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="container mt-5">
+        <h1 th:if="${action == 'new'}">Nuevo Estudio</h1>
+        <h1 th:if="${action == 'edit'}">Editar Estudio</h1>
+
+        <div th:if="${error}" class="alert alert-danger" role="alert" th:text="${error}"></div>
+        <div th:if="${success}" class="alert alert-success" role="alert" th:text="${success}"></div>
+
+        <form th:action="@{${action == 'new'} ? '/estudios/new' : '/estudios/' + ${estudio.id}}" method="post">
+            <div class="mb-3">
+                <label for="nombre" class="form-label">Nombre:</label>
+                <input type="text" id="nombre" name="nombre" class="form-control" th:value="${estudio.nombre}"
+                    required />
+            </div>
+            <button type="submit" class="btn btn-primary"
+                th:text="${action == 'new'} ? 'Guardar' : 'Actualizar'"></button>
+        </form>
+
+        <a class="btn btn-secondary mt-3" href="/estudios">Regresar a la lista</a>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
