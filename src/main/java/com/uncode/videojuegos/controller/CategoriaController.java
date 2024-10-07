@@ -36,43 +36,43 @@ public class CategoriaController {
         return "categoria/index";
     }
 
-    @PostMapping
+    @GetMapping("/new")
+    public String getNewCategoria(Model model) {
+        model.addAttribute("action", "new");
+        model.addAttribute("categoria", Categoria.builder().build());
+        return "categoria/form";
+    }
+
+    @PostMapping("/new")
     public String postCategoria(@RequestParam String nombre, Model model,
             RedirectAttributes redirectAttributes) {
         try {
-            service.create(nombre);
-            redirectAttributes.addFlashAttribute("success", "Categoria guardada correctamente");
+            var id = service.create(nombre);
+            redirectAttributes.addFlashAttribute("success", "Categoría creada correctamente");
+            return "redirect:/categorias/" + id;
         } catch (ServiceException e) {
             model.addAttribute("error", e.getMessage());
-            model.addAttribute("newCategoria", Categoria.builder().nombre(nombre).build());
-            return "categoria/form";
+            model.addAttribute("categoria", Categoria.builder().nombre(nombre).build());
         } catch (Exception e) {
             model.addAttribute("error", "Ha ocurrido un error inesperado");
-            model.addAttribute("newCategoria", Categoria.builder().nombre(nombre).build());
-            return "categoria/form";
+            model.addAttribute("categoria", Categoria.builder().nombre(nombre).build());
         }
-        return "redirect:/categorias";
-    }
-
-    @GetMapping("/new")
-    public String getNewCategoria() {
         return "categoria/form";
     }
 
     @GetMapping("/{id}")
-    public String getCategoria(@PathVariable UUID id, Model model) {
+    public String getCategoria(@PathVariable UUID id, Model model, RedirectAttributes redirectAttributes) {
         try {
-            var categoria = service.get(id).orElseThrow(
-                    () -> new ServiceException("Categoria no encontrada"));
-            model.addAttribute("categoria", categoria);
+            model.addAttribute("action", "edit");
+            model.addAttribute("categoria", service.get(id).orElseThrow(
+                    () -> new ServiceException("Categoria no encontrada")));
+            return "categoria/form";
         } catch (ServiceException e) {
-            model.addAttribute("error", e.getMessage());
-            return "redirect:/categorias";
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
         } catch (Exception e) {
-            model.addAttribute("error", "Ha ocurrido un error inesperado");
-            return "redirect:/categorias";
+            redirectAttributes.addFlashAttribute("error", "Ha ocurrido un error inesperado");
         }
-        return "categoria/form";
+        return "redirect:/categorias";
     }
 
     @PostMapping("/{id}")
@@ -81,7 +81,7 @@ public class CategoriaController {
         try {
             service.update(id, nombre);
             redirectAttributes.addFlashAttribute("success", "Categoría actualizada correctamente");
-            return "redirect:/categorias";
+            return "redirect:/categorias/" + id;
         } catch (ServiceException e) {
             model.addAttribute("error", e.getMessage());
         } catch (Exception e) {
@@ -91,14 +91,14 @@ public class CategoriaController {
     }
 
     @PostMapping("/{id}/delete")
-    public String deleteCategoria(@PathVariable UUID id, Model model) {
+    public String deleteCategoria(@PathVariable UUID id, Model model, RedirectAttributes redirectAttributes) {
         try {
             service.delete(id);
-            model.addAttribute("success", "Categoria eliminada correctamente");
+            redirectAttributes.addFlashAttribute("success", "Categoria eliminada correctamente");
         } catch (ServiceException e) {
-            model.addAttribute("error", e.getMessage());
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
         } catch (Exception e) {
-            model.addAttribute("error", "Ha ocurrido un error inesperado");
+            redirectAttributes.addFlashAttribute("error", "Ha ocurrido un error inesperado");
         }
         return "redirect:/categorias";
     }

@@ -10,20 +10,20 @@
 
 <body>
     <div class="container mt-5">
-        <h1 th:if="${categoria == null}">Nueva Categoría</h1>
-        <h1 th:if="${categoria != null}">Editar Categoría</h1>
+        <h1 th:if="${action == 'new'}">Nueva Categoría</h1>
+        <h1 th:if="${action == 'edit'}">Editar Categoría</h1>
 
         <div th:if="${error}" class="alert alert-danger" role="alert" th:text="${error}"></div>
+        <div th:if="${success}" class="alert alert-success" role="alert" th:text="${success}"></div>
 
-        <form th:action="@{${categoria != null} ? '/categorias/' + ${categoria.id} : '/categorias'}" method="post">
+        <form th:action="@{${action == 'new'} ? '/categorias/new' : '/categorias/' + ${categoria.id}}" method="post">
             <div class="mb-3">
                 <label for="nombre" class="form-label">Nombre:</label>
-                <input type="text" id="nombre" name="nombre" class="form-control"
-                    th:value="${categoria != null} ? ${categoria.nombre} : ${newCategoria != null ? newCategoria.nombre : ''}"
+                <input type="text" id="nombre" name="nombre" class="form-control" th:value="${categoria.nombre}"
                     required />
             </div>
             <button type="submit" class="btn btn-primary"
-                th:text="${categoria != null} ? 'Actualizar' : 'Guardar'"></button>
+                th:text="${action == 'new'} ? 'Guardar' : 'Actualizar'"></button>
         </form>
 
         <a class="btn btn-secondary mt-3" href="/categorias">Regresar a la lista</a>

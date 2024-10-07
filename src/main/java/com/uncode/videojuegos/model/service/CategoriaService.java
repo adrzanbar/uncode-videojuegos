@@ -31,25 +31,25 @@ public class CategoriaService {
         } catch (NullPointerException e) {
             throw new ServiceException(ServiceExceptionMessages.$null(Categoria.class, "nombre"));
         } catch (Exception e) {
-            System.err.println(e.getMessage());
             throw new ServiceException(ServiceExceptionMessages.ANY);
         }
     }
 
     @Transactional
-    public void create(String nombre) throws ServiceException {
+    public UUID create(String nombre) throws ServiceException {
         try {
             validate(nombre);
             if (repository.existsByActivoTrueAndNombre(nombre)) {
                 throw new ServiceException(ServiceExceptionMessages.exists(Categoria.class, "nombre", nombre));
             }
-            repository.save(Categoria.builder()
-                    .nombre(nombre)
-                    .build());
+            var categoria = Categoria.builder()
+            .nombre(nombre)
+            .build();
+            repository.save(categoria);
+            return categoria.getId();
         } catch (ServiceException e) {
             throw e;
         } catch (Exception e) {
-            System.err.println(e.getMessage());
             throw new ServiceException(ServiceExceptionMessages.ANY);
         }
     }
