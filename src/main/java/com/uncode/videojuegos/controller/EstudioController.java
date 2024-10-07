@@ -52,11 +52,11 @@ public class EstudioController {
             return "redirect:/estudios/" + id;
         } catch (ServiceException e) {
             model.addAttribute("error", e.getMessage());
-            model.addAttribute("estudio", Estudio.builder().nombre(nombre).build());
         } catch (Exception e) {
             model.addAttribute("error", "Ha ocurrido un error inesperado");
-            model.addAttribute("estudio", Estudio.builder().nombre(nombre).build());
         }
+        model.addAttribute("action", "new");
+        model.addAttribute("estudio", Estudio.builder().nombre(nombre).build());
         return "estudio/form";
     }
 

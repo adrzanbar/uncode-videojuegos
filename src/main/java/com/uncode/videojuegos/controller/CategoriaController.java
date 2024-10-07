@@ -52,11 +52,11 @@ public class CategoriaController {
             return "redirect:/categorias/" + id;
         } catch (ServiceException e) {
             model.addAttribute("error", e.getMessage());
-            model.addAttribute("categoria", Categoria.builder().nombre(nombre).build());
         } catch (Exception e) {
             model.addAttribute("error", "Ha ocurrido un error inesperado");
-            model.addAttribute("categoria", Categoria.builder().nombre(nombre).build());
         }
+        model.addAttribute("action", "new");
+        model.addAttribute("categoria", Categoria.builder().nombre(nombre).build());
         return "categoria/form";
     }
 
