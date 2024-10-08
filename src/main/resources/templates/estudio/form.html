@@ -6,26 +6,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Formulario de Estudio</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
     <script>
         function confirmSubmission(action) {
             if (action === 'edit') {
                 return confirm("¿Estás seguro de que deseas guardar los cambios?");
             }
-            return true; // No confirmation for other actions
+            return true;
         }
     </script>
 </head>
 
 <body>
     <div class="container mt-5">
-        <h1 th:if="${action == 'new'}">Nuevo Estudio</h1>
+        <h1 th:if="${action == 'new'}">Nueva Estudio</h1>
         <h1 th:if="${action == 'edit'}">Editar Estudio</h1>
 
         <div th:if="${error}" class="alert alert-danger" role="alert" th:text="${error}"></div>
         <div th:if="${success}" class="alert alert-success" role="alert" th:text="${success}"></div>
 
-        <form th:action="@{${action == 'new'} ? '/estudios/new' : '/estudios/' + ${estudio.id}}" method="post"
-            th:onsubmit="return confirmSubmission([[${action}]]);">
+        <form th:action="@{${action == 'new'} ? '/estudio/new' : '/estudio/' + ${estudio.id}}" method="post" th:onsubmit="return confirmSubmission([[${action}]]);">
             <div class="mb-3">
                 <label for="nombre" class="form-label">Nombre:</label>
                 <input type="text" id="nombre" name="nombre" class="form-control" th:value="${estudio.nombre}"
@@ -33,11 +33,15 @@
             </div>
             <div class="container mb-3">
                 <button type="submit" class="btn mt-3"
-                    th:classappend="${action == 'new'} ? 'btn-primary' : 'btn-warning'"
-                    th:text="${action == 'new'} ? 'Crear' : 'Guardar'"></button>
-                <a class="btn btn-secondary mt-3" href="/estudios">Cancelar</a>
+                    th:classappend="${action == 'new'} ? 'btn-primary' : 'btn-warning'">
+                    <i class="bi bi-check-circle"></i>
+                </button>
+                <a class="btn btn-secondary mt-3" href="/estudios">
+                    <i class="bi bi-x-circle"></i>
+                </a>
             </div>
         </form>
+
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
