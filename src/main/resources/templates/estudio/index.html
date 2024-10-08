@@ -33,7 +33,6 @@
             </thead>
             <tbody>
                 <tr th:each="estudio : ${estudios}">
-                    <td th:text="${estudio.id}"></td>
                     <td th:text="${estudio.nombre}"></td>
                     <td>
                         <a class="btn btn-info" th:href="@{/estudios/{id}(id=${estudio.id})}">Ver</a>
