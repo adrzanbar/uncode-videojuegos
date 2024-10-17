@@ -19,13 +19,14 @@
 
 <body>
     <div class="container mt-5">
-        <h1 th:if="${action == 'new'}">Nueva Estudio</h1>
+        <h1 th:if="${action == 'new'}">Nuevo Estudio</h1>
         <h1 th:if="${action == 'edit'}">Editar Estudio</h1>
 
         <div th:if="${error}" class="alert alert-danger" role="alert" th:text="${error}"></div>
         <div th:if="${success}" class="alert alert-success" role="alert" th:text="${success}"></div>
 
-        <form th:action="@{${action == 'new'} ? '/estudio/new' : '/estudio/' + ${estudio.id}}" method="post" th:onsubmit="return confirmSubmission([[${action}]]);">
+        <form th:action="@{${action == 'new'} ? '/estudios/new' : '/estudios/' + ${estudio.id}}" method="post"
+            th:onsubmit="return confirmSubmission([[${action}]]);">
             <div class="mb-3">
                 <label for="nombre" class="form-label">Nombre:</label>
                 <input type="text" id="nombre" name="nombre" class="form-control" th:value="${estudio.nombre}"
