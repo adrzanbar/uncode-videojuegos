@@ -70,7 +70,7 @@ public class VideojuegoController {
             @RequestParam short cantidad,
             @RequestParam String descripcion,
             @RequestParam(required = false) Boolean oferta,
-            @RequestParam String lanzamiento, // Handle date conversion
+            @RequestParam String lanzamiento,
             @RequestParam UUID categoriaId,
             @RequestParam UUID estudioId,
             Model model,
